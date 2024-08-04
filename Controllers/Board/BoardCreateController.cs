@@ -31,8 +31,7 @@ namespace TaskBoard.Controllers.Board
             var board = new Models.Board
             {
                 Name = boardCreateRequest.Name,
-                Description = boardCreateRequest.Description,
-                UserId = boardCreateRequest.UserId
+                Description = boardCreateRequest.Description
             };
 
             await _boardService.CreateBoardAsync(board);
@@ -40,8 +39,7 @@ namespace TaskBoard.Controllers.Board
             {
                 Id = board.Id,
                 Name = board.Name,
-                Description = board.Description,
-                UserId = board.UserId
+                Description = board.Description
             };
 
             return CreatedAtAction(nameof(BoardReadController.GetBoard), "BoardRead", new { id = board.Id }, boardResponse);
@@ -53,9 +51,7 @@ namespace TaskBoard.Controllers.Board
             public string Name { get; set; }
             
             public string Description { get; set; }
-            
-            [Required]
-            public string UserId { get; set; }
+
         }
 
         public class BoardResponse
@@ -63,7 +59,6 @@ namespace TaskBoard.Controllers.Board
             public int Id { get; set; }
             public string Name { get; set; }
             public string Description { get; set; }
-            public string UserId { get; set; }
         }
     }
 }

@@ -10,10 +10,9 @@ namespace TaskBoard.Models
         public int Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        
-        public string UserId { get; set; }
-        public User User { get; set; }
-        
-        public ICollection<List> Lists { get; set; }
+
+        public ICollection<BoardUser> BoardUsers { get; set; } = new List<BoardUser>();
+
+        public ICollection<List> Lists { get; set; } = new List<List>();
     }
 }

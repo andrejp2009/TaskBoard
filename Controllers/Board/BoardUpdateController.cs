@@ -36,8 +36,7 @@ namespace TaskBoard.Controllers.Board
             {
                 Id = boardUpdateRequest.Id,
                 Name = boardUpdateRequest.Name,
-                Description = boardUpdateRequest.Description,
-                UserId = boardUpdateRequest.UserId
+                Description = boardUpdateRequest.Description
             };
 
             await _boardService.UpdateBoardAsync(board);
@@ -53,9 +52,7 @@ namespace TaskBoard.Controllers.Board
             public string Name { get; set; }
             
             public string Description { get; set; }
-            
-            [Required]
-            public string UserId { get; set; }
+
         }
     }
 }

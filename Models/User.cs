@@ -8,6 +8,6 @@ namespace TaskBoard.Models
 {
     public class User : IdentityUser
     {
-        public ICollection<Board> Boards { get; set; }
+        public ICollection<BoardUser> BoardUsers { get; set; } = new List<BoardUser>();
     }
 }

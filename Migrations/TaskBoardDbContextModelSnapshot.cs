@@ -169,14 +169,27 @@ namespace TaskBoard.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
+                    b.HasKey("Id");
+
+                    b.ToTable("Boards");
+                });
+
+            modelBuilder.Entity("TaskBoard.Models.BoardUser", b =>
+                {
+                    b.Property<int>("BoardId")
+                        .HasColumnType("int");
+
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("Id");
+                    b.Property<string>("Role")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("BoardId", "UserId");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Boards");
+                    b.ToTable("BoardUsers");
                 });
 
             modelBuilder.Entity("TaskBoard.Models.Card", b =>
@@ -401,11 +414,21 @@ namespace TaskBoard.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("TaskBoard.Models.Board", b =>
+            modelBuilder.Entity("TaskBoard.Models.BoardUser", b =>
                 {
+                    b.HasOne("TaskBoard.Models.Board", "Board")
+                        .WithMany("BoardUsers")
+                        .HasForeignKey("BoardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("TaskBoard.Models.User", "User")
-                        .WithMany("Boards")
-                        .HasForeignKey("UserId");
+                        .WithMany("BoardUsers")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Board");
 
                     b.Navigation("User");
                 });
@@ -464,6 +487,8 @@ namespace TaskBoard.Migrations
 
             modelBuilder.Entity("TaskBoard.Models.Board", b =>
                 {
+                    b.Navigation("BoardUsers");
+
                     b.Navigation("Lists");
                 });
 
@@ -486,7 +511,7 @@ namespace TaskBoard.Migrations
 
             modelBuilder.Entity("TaskBoard.Models.User", b =>
                 {
-                    b.Navigation("Boards");
+                    b.Navigation("BoardUsers");
                 });
 #pragma warning restore 612, 618
         }

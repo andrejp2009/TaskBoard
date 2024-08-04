@@ -1,10 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
 using System.Threading.Tasks;
-using System.Linq;
-using System.ComponentModel.DataAnnotations;
 using TaskBoard.Models;
-using Swashbuckle.AspNetCore.Annotations;
+using System.ComponentModel.DataAnnotations;
+using Microsoft.Extensions.Logging;
 
 namespace TaskBoard.Controllers.User
 {
@@ -13,18 +12,20 @@ namespace TaskBoard.Controllers.User
     public class UserRegisterController : ControllerBase 
     {
         private readonly UserManager<Models.User> _userManager;
+        private readonly ILogger<UserRegisterController> _logger;
 
-        public UserRegisterController(UserManager<Models.User> userManager)
+        public UserRegisterController(UserManager<Models.User> userManager, ILogger<UserRegisterController> logger)
         {
             _userManager = userManager;
+            _logger = logger;
         }
         
         [HttpPost("register")]
-                [SwaggerOperation(Summary = "User registration", Description = "Allows a new user to register by providing their username, email, and password.", Tags = new[] { "User" })]
         public async Task<IActionResult> Register([FromBody] RegisterRequest registerRequest)
         {
             if (!ModelState.IsValid)
             {
+                _logger.LogError("Model state is invalid: {ModelState}", ModelState);
                 return BadRequest(ModelState);
             }
 
@@ -38,24 +39,24 @@ namespace TaskBoard.Controllers.User
 
             if (!result.Succeeded)
             {
-                return BadRequest(result.Errors);
+                _logger.LogError("User creation failed: {Errors}", result.Errors);
+                return BadRequest(new { errors = result.Errors });
             }
 
+            _logger.LogInformation("User registered successfully: {UserName}", user.UserName);
             return Ok(new { message = "User registered successfully" });
         }
     }
 
-        public class RegisterRequest
+    public class RegisterRequest
     {
         [Required]
         [EmailAddress]
         [MinLength(1)]
-
         public string Email { get; set; }
 
         [Required]
         [MinLength(1)]
-
         public string UserName { get; set; }
 
         [Required]
@@ -64,5 +65,3 @@ namespace TaskBoard.Controllers.User
         public string Password { get; set; }
     }
 }
-
-

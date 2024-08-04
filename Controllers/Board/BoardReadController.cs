@@ -27,8 +27,7 @@ namespace TaskBoard.Controllers.Board
             {
                 Id = b.Id,
                 Name = b.Name,
-                Description = b.Description,
-                UserId = b.UserId
+                Description = b.Description
             }).ToList();
 
             return Ok(boardResponses);
@@ -48,8 +47,7 @@ namespace TaskBoard.Controllers.Board
             {
                 Id = board.Id,
                 Name = board.Name,
-                Description = board.Description,
-                UserId = board.UserId
+                Description = board.Description
             };
 
             return Ok(boardResponse);

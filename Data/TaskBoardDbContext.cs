@@ -17,6 +17,7 @@ namespace TaskBoard.Data
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Label> Labels { get; set; }
         public DbSet<CardLabel> CardLabels { get; set; }
+        public DbSet<BoardUser> BoardUsers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -35,11 +36,18 @@ namespace TaskBoard.Data
                 .WithMany(l => l.CardLabels)
                 .HasForeignKey(cl => cl.LabelId);
 
-            // Настройка отношения между User и Board
-            modelBuilder.Entity<Board>()
-                .HasOne(b => b.User)
-                .WithMany(u => u.Boards)
-                .HasForeignKey(b => b.UserId);
+            modelBuilder.Entity<BoardUser>()
+                .HasKey(bu => new { bu.BoardId, bu.UserId });
+
+            modelBuilder.Entity<BoardUser>()
+                .HasOne(bu => bu.Board)
+                .WithMany(b => b.BoardUsers)
+                .HasForeignKey(bu => bu.BoardId);
+
+            modelBuilder.Entity<BoardUser>()
+                .HasOne(bu => bu.User)
+                .WithMany(u => u.BoardUsers)
+                .HasForeignKey(bu => bu.UserId);
         }
     }
 }

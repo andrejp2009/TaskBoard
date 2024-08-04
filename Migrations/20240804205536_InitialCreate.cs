@@ -51,6 +51,20 @@ namespace TaskBoard.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Boards",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Boards", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Labels",
                 columns: table => new
                 {
@@ -171,23 +185,28 @@ namespace TaskBoard.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Boards",
+                name: "BoardUsers",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    BoardId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Role = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Boards", x => x.Id);
+                    table.PrimaryKey("PK_BoardUsers", x => new { x.BoardId, x.UserId });
                     table.ForeignKey(
-                        name: "FK_Boards_AspNetUsers_UserId",
+                        name: "FK_BoardUsers_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_BoardUsers_Boards_BoardId",
+                        column: x => x.BoardId,
+                        principalTable: "Boards",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -317,8 +336,8 @@ namespace TaskBoard.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Boards_UserId",
-                table: "Boards",
+                name: "IX_BoardUsers_UserId",
+                table: "BoardUsers",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
@@ -361,6 +380,9 @@ namespace TaskBoard.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "BoardUsers");
+
+            migrationBuilder.DropTable(
                 name: "CardLabels");
 
             migrationBuilder.DropTable(
@@ -368,6 +390,9 @@ namespace TaskBoard.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "Labels");
@@ -380,9 +405,6 @@ namespace TaskBoard.Migrations
 
             migrationBuilder.DropTable(
                 name: "Boards");
-
-            migrationBuilder.DropTable(
-                name: "AspNetUsers");
         }
     }
 }

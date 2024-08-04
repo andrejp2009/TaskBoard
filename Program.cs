@@ -5,9 +5,14 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Identity;
 using TaskBoard.Data;
 using TaskBoard.Models;
+using TaskBoard.Services;
+using TaskBoard.Services.Interfaces;
+using TaskBoard.Data.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace TaskBoard
 {
@@ -24,9 +29,43 @@ namespace TaskBoard
 
             builder.Services.AddIdentity<User, IdentityRole>(options => 
             {
+                // Настройки идентификации (пароли, блокировка и т.д.)
             })
             .AddEntityFrameworkStores<TaskBoardDbContext>()
             .AddDefaultTokenProviders();
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy",
+                    builder => builder
+                        .AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader());
+            });
+
+            // Получаем параметры JWT из конфигурации
+            var jwtSecret = builder.Configuration["JwtSettings:Secret"];
+            var jwtIssuer = builder.Configuration["JwtSettings:Issuer"];
+            var jwtAudience = builder.Configuration["JwtSettings:Audience"];
+
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtIssuer,
+                    ValidAudience = jwtAudience,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret))
+                };
+            });
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
@@ -35,6 +74,15 @@ namespace TaskBoard
                 c.TagActionsBy(api => new[] { api.GroupName });
                 c.DocInclusionPredicate((name, api) => true);
             });
+
+            builder.Services.AddScoped<IBoardService, BoardService>();
+            builder.Services.AddScoped<IListService, ListService>();
+            builder.Services.AddScoped<ICardService, CardService>();
+
+            builder.Services.AddScoped<IBoardRepository, BoardRepository>();
+            builder.Services.AddScoped<IListRepository, ListRepository>();
+            builder.Services.AddScoped<ICardRepository, CardRepository>();
+
             builder.Services.AddControllers().AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
@@ -53,6 +101,11 @@ namespace TaskBoard
             }
 
             app.UseHttpsRedirection();
+
+            app.UseRouting();
+
+            app.UseCors("CorsPolicy");
+
             app.UseAuthentication();
             app.UseAuthorization();
 
